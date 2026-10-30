@@ -1,0 +1,14 @@
+{
+  "name": "stay-awake",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "set ELECTRON_RUN_AS_NODE=&& electron .",
+    "screenshots": "set ELECTRON_RUN_AS_NODE=&& electron scripts/screenshot.js"
+  },
+  "devDependencies": {
+    "electron": "^33.4.11"
+  },
+  "description": "Keep your Windows laptop awake and your Teams/Slack status Active.",
+  "license": "MIT"
+}
