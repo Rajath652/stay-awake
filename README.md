@@ -36,7 +36,7 @@ powercfg /requests
 Requirements: Windows 10/11 and [Node.js](https://nodejs.org/) 18+.
 
 ```bash
-git clone https://github.com/<your-username>/stay-awake.git
+git clone https://github.com/Rajath652/stay-awake.git
 cd stay-awake
 npm install
 npm start
