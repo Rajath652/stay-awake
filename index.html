@@ -6,11 +6,11 @@
 <title>Stay Awake</title>
 <style>
   body { font-family: system-ui, sans-serif; background: #111; color: #eee; margin: 0; padding: 20px; text-align: center; }
-  select, button { width: 100%; padding: 10px; margin-top: 10px; font-size: 14px; border-radius: 6px; border: 1px solid #333; background: #222; color: #eee; }
+  select, input[type=number], button { width: 100%; box-sizing: border-box; padding: 10px; margin-top: 10px; font-size: 14px; border-radius: 6px; border: 1px solid #333; background: #222; color: #eee; }
   label { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; text-align: left; cursor: pointer; }
   button { font-size: 18px; font-weight: 600; cursor: pointer; background: #2563eb; border: none; }
   button.on { background: #dc2626; }
-  #status { margin-top: 14px; font-size: 13px; color: #aaa; }
+  #status { margin-top: 14px; font-size: 13px; color: #aaa; white-space: pre-line; }
 </style>
 </head>
 <body>
@@ -19,30 +19,60 @@
     <option value="prevent-app-suspension">Keep system awake only</option>
   </select>
   <select id="mins">
-    <option value="0">Until I stop it</option>
-    <option value="30">30 minutes</option>
-    <option value="60">1 hour</option>
-    <option value="120">2 hours</option>
+    <option value="0">Timer: until I stop it</option>
+    <option value="5">Timer: 5 minutes</option>
+    <option value="10">Timer: 10 minutes</option>
+    <option value="15">Timer: 15 minutes</option>
+    <option value="30">Timer: 30 minutes</option>
+    <option value="60">Timer: 1 hour</option>
+    <option value="120">Timer: 2 hours</option>
+    <option value="custom">Timer: custom…</option>
   </select>
+  <input type="number" id="custom" min="1" max="1440" placeholder="Minutes (1–1440)" hidden>
   <label><input type="checkbox" id="active" checked> Keep Teams / Slack status Active</label>
   <button id="btn">Start</button>
   <div id="status">Laptop can sleep normally</div>
 <script>
-  let on = false;
+  let on = false, endsAt = 0, tick = null;
   const btn = document.getElementById('btn'), status = document.getElementById('status');
+
+  mins.onchange = () => { custom.hidden = mins.value !== 'custom'; if (!custom.hidden) custom.focus(); };
+
+  function minutes() {
+    if (mins.value !== 'custom') return Number(mins.value);
+    const n = Math.floor(Number(custom.value));
+    return n >= 1 && n <= 1440 ? n : null;
+  }
+
+  function remaining() {
+    const s = Math.max(0, Math.round((endsAt - Date.now()) / 1000));
+    const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = String(s % 60).padStart(2, '0');
+    return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+  }
+
   function render() {
     btn.textContent = on ? 'Stop' : 'Start';
     btn.classList.toggle('on', on);
-    for (const el of [mode, mins, active]) el.disabled = on;
-    status.textContent = !on ? 'Laptop can sleep normally'
-      : active.checked ? 'Keeping laptop awake + status Active' : 'Keeping laptop awake';
+    for (const el of [mode, mins, custom, active]) el.disabled = on;
+    if (!on) { status.textContent = 'Laptop can sleep normally'; return; }
+    status.textContent = (active.checked ? 'Keeping laptop awake + status Active' : 'Keeping laptop awake')
+      + (endsAt ? `\nStops in ${remaining()}` : '');
   }
+
   btn.onclick = async () => {
-    on = on ? await window.awake.stop()
-            : await window.awake.start(mode.value, Number(mins.value), active.checked);
+    if (on) {
+      on = await window.awake.stop();
+    } else {
+      const m = minutes();
+      if (m === null) { status.textContent = 'Enter custom minutes between 1 and 1440'; custom.focus(); return; }
+      on = await window.awake.start(mode.value, m, active.checked);
+      endsAt = m ? Date.now() + m * 60000 : 0;
+    }
+    clearInterval(tick);
+    if (on && endsAt) tick = setInterval(render, 1000);
     render();
   };
-  window.awake.onStopped(() => { on = false; render(); });
+  window.awake.onStopped(() => { on = false; clearInterval(tick); render(); });
 </script>
 </body>
 </html>
