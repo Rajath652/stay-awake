@@ -13,7 +13,7 @@ Handy for long downloads, builds, presentations, or leaving an AI coding agent r
 - **Keep screen + system awake**: the display stays on and the laptop never sleeps.
 - **Keep system awake only**: the display can turn off, but the laptop keeps running (uses less power).
 - **Keep Teams / Slack status Active**: stops your status from going Away while you're not at the keyboard.
-- **Timer**: run until you stop it, or for 30 min, 1 hour or 2 hours.
+- **Timer**: run until you stop it, for 5 / 10 / 15 / 30 min, 1 or 2 hours, or a **custom** number of minutes (1–1440). A live countdown shows the time left, then everything switches off automatically.
 - Click **Stop** or close the window and your normal power settings come back.
 
 ## How it works

@@ -23,7 +23,7 @@ function stop() {
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({
-    width: 320, height: 340, resizable: false, autoHideMenuBar: true,
+    width: 320, height: 400, resizable: false, autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.js') }
   });
   win.loadFile('index.html');
